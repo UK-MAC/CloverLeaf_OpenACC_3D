@@ -1,0 +1,24 @@
+Running on host node46-005
+Time is Tue Jul 1 07:37:43 BST 2014
+Directory is /panfs/panasas01/cosc/ik13758/thesis/CloverLeaf_ref-1_1_3d_OpenACC3
+PBS job ID is 606099.master.cm.cluster
+This jobs runs on the following machines:
+node46-005 node47-005 node47-004 node47-003 node47-002 node47-001 node46-017 node46-016
+node46-005
+node47-005
+node47-004
+node47-003
+node47-002
+node47-001
+node46-017
+node46-016
+/cm/local/apps/torque/4.2.4.1/spool/aux//606099.master.cm.cluster
+Tue Jul  1 07:37:43 BST 2014
+ 
+Clover Version    1.100
+       MPI Version
+    OpenMP Version
+   Task Count      8
+ Thread Count:     1
+ 
+ Output file clover.out opened. All output will go there.

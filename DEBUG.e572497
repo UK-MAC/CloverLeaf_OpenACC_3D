@@ -1,0 +1,8 @@
+ssh: Could not resolve hostname node46-006-gpu0: Name or service not known
+ssh: Could not resolve hostname node46-005-gpu0: Name or service not known
+=>> PBS: job killed: walltime 637 exceeded limit 600
+[mpiexec@node46-005] HYD_pmcd_pmiserv_send_signal (./pm/pmiserv/pmiserv_cb.c:184): assert (!closed) failed
+[mpiexec@node46-005] ui_cmd_cb (./pm/pmiserv/pmiserv_pmci.c:74): unable to send SIGUSR1 downstream
+[mpiexec@node46-005] HYDT_dmxu_poll_wait_for_event (./tools/demux/demux_poll.c:77): callback returned error status
+[mpiexec@node46-005] HYD_pmci_wait_for_completion (./pm/pmiserv/pmiserv_pmci.c:181): error waiting for event
+[mpiexec@node46-005] main (./ui/mpich/mpiexec.c:405): process manager error waiting for completion

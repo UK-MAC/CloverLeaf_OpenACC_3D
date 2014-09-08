@@ -1,0 +1,3 @@
+
+clover_leaf:89015 terminated with signal 11 at PC=4cf141 SP=7fffffffcd40.  Backtrace:
+./clover_leaf[0x4cf141]

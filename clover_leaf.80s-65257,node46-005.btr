@@ -1,0 +1,3 @@
+
+clover_leaf:65257 terminated with signal 11 at PC=45c8e1 SP=7fffffffcf80.  Backtrace:
+/panfs/panasas01/cosc/ik13758/thesis/CloverLeaf_ref-1_1_3d_OpenACC/clover_leaf[0x45c8e1]

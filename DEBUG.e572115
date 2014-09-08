@@ -1,0 +1,11 @@
+ 
+Clover Version    1.100
+       MPI Version
+    OpenMP Version
+   Task Count      2
+ Thread Count:     1
+ 
+FATAL ERROR: data in PRESENT clause was not found on device 1: name=field
+ file:/panfs/panasas01/cosc/ik13758/thesis/CloverLeaf_ref-1_1_3d_OpenACC/pack_kernel.f90 clover_pack_message_front line:724
+FATAL ERROR: data in PRESENT clause was not found on device 1: name=field
+ file:/panfs/panasas01/cosc/ik13758/thesis/CloverLeaf_ref-1_1_3d_OpenACC/pack_kernel.f90 clover_pack_message_back line:595

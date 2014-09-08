@@ -1,0 +1,9 @@
+ 
+Clover Version    1.100
+       MPI Version
+    OpenMP Version
+   Task Count      2
+ Thread Count:     1
+ 
+call to cuCtxCreate returned error 101: Invalid device
+Warning: Permanently added 'node46-008,10.131.1.32' (RSA) to the list of known hosts.

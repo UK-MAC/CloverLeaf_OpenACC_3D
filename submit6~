@@ -1,0 +1,35 @@
+#!/bin/bash
+#PBS -N DEBUG
+#PBS -o OUT
+#PBS -q gpu
+#PBS -l nodes=4:ppn=1:gpus=1,walltime=00:10:00
+#PBS -m abe
+#! application name
+application="clover_leaf"
+#! Run options for the application
+options=""
+# load the VTune module
+module add intel-cluster-studio/vtune/vtune-2013
+export OMP_NUM_THREADS=1
+#!export TAU_COMM_MATRIX=1
+#! change the working directory (default is home directory)
+cd $PBS_O_WORKDIR
+echo Running on host `hostname`
+echo Time is `date`
+echo Directory is `pwd`
+echo PBS job ID is $PBS_JOBID
+echo This jobs runs on the following machines:
+echo `cat $PBS_NODEFILE | uniq`
+#! Profile the executable
+cat $PBS_NODEFILE
+echo $PBS_NODEFILE
+date
+nnodes=`wc $PBS_NODEFILE | awk '{ print $1 }'`
+nnodes=4
+mpirun -machinefile $PBS_NODEFILE -np $nnodes ./$application
+
+#!mpirun -machinefile nod -np 4 amplxe-cl -collect hotspots -result-dir r02mpi16openmptest23liakx ./clover_leaf
+
+#!amplxe-cl -quiet -collect hotspots -result-dir r02mpi16openmp $application $options
+#!$application $options
+#!mpirun -np 4 ./clover_leaf

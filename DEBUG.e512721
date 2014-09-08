@@ -1,0 +1,11 @@
+ 
+Clover Version    1.100
+       MPI Version
+    OpenMP Version
+   Task Count      1
+ Thread Count:     1
+ 
+ Step       1 time   0.0000000 control    sound    timestep   1.00E-01       1,       1 x  5.00E+00 y  2.00E-01
+FATAL ERROR: data in PRESENT clause was not found on device 1: name=volume_change
+ file:/panfs/panasas01/cosc/ik13758/thesis/CloverLeaf_ref-1_1_3d_OpenACC/PdV_kernel.f90 pdv_kernel line:72
+Warning: Permanently added 'node46-001,10.131.1.25' (RSA) to the list of known hosts.

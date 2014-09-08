@@ -1,0 +1,272 @@
+!Crown Copyright 2012 AWE.
+!
+! This file is part of CloverLeaf.
+!
+! CloverLeaf is free software: you can redistribute it and/or modify it under 
+! the terms of the GNU General Public License as published by the 
+! Free Software Foundation, either version 3 of the License, or (at your option) 
+! any later version.
+!
+! CloverLeaf is distributed in the hope that it will be useful, but 
+! WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+! FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more 
+! details.
+!
+! You should have received a copy of the GNU General Public License along with 
+! CloverLeaf. If not, see http://www.gnu.org/licenses/.
+
+!>  @brief Generates graphics output files.
+!>  @author Wayne Gaudin
+!>  @details The field data over all mesh chunks is written to a .vtk files and
+!>  the .visit file is written that defines the time for each set of vtk files.
+!>  The ideal gas and viscosity routines are invoked to make sure this data is
+!>  up to data with the current energy, density and velocity.
+
+SUBROUTINE visit
+
+  USE clover_module
+  USE update_halo_module
+  USE viscosity_module
+  USE ideal_gas_module
+
+  IMPLICIT NONE
+
+  INTEGER :: j,k,l,c,err,get_unit,u,dummy
+  INTEGER :: nxc,nyc,nzc,nxv,nyv,nzv,nblocks
+  REAL(KIND=8)    :: temp_var
+
+  CHARACTER(len=80)           :: name
+  CHARACTER(len=10)           :: chunk_name,step_name
+  CHARACTER(len=90)           :: filename
+
+  LOGICAL, SAVE :: first_call=.TRUE.
+
+  INTEGER :: fields(NUM_FIELDS)
+
+  REAL(KIND=8) :: kernel_time,timer
+
+INTEGER :: x_min,x_max,y_min,y_max,z_min,z_max
+
+  name = 'clover'
+  IF ( parallel%boss ) THEN
+    IF(first_call) THEN
+
+      nblocks=number_of_chunks
+      filename = "clover.visit"
+      u=get_unit(dummy)
+      OPEN(UNIT=u,FILE=filename,STATUS='UNKNOWN',IOSTAT=err)
+      WRITE(u,'(a,i5)')'!NBLOCKS ',nblocks
+      CLOSE(u)
+
+      first_call=.FALSE.
+
+    ENDIF
+  ENDIF
+
+  IF(profiler_on) kernel_time=timer()
+  DO c=1,chunks_per_task
+    CALL ideal_gas(c,.FALSE.)
+  ENDDO
+  IF(profiler_on) profiler%ideal_gas=profiler%ideal_gas+(timer()-kernel_time)
+
+  fields=0
+  fields(FIELD_PRESSURE)=1
+  fields(FIELD_XVEL0)=1
+  fields(FIELD_YVEL0)=1
+  fields(FIELD_ZVEL0)=1
+  IF(profiler_on) kernel_time=timer()
+  CALL update_halo(fields,1)
+  IF(profiler_on) profiler%halo_exchange=profiler%halo_exchange+(timer()-kernel_time)
+
+  IF(profiler_on) kernel_time=timer()
+  CALL viscosity()
+  IF(profiler_on) profiler%viscosity=profiler%viscosity+(timer()-kernel_time)
+  IF ( parallel%boss ) THEN
+
+    filename = "clover.visit"
+    u=get_unit(dummy)
+    OPEN(UNIT=u,FILE=filename,STATUS='UNKNOWN',POSITION='APPEND',IOSTAT=err)
+
+    DO c = 1, number_of_chunks
+      WRITE(chunk_name, '(i6)') c+100000
+      chunk_name(1:1) = "."
+      WRITE(step_name, '(i6)') step+100000
+      step_name(1:1) = "."
+      filename = trim(trim(name) //trim(chunk_name)//trim(step_name))//".vtk"
+      WRITE(u,'(a)')TRIM(filename)
+    ENDDO
+    CLOSE(u)
+
+  ENDIF
+
+  IF(profiler_on) kernel_time=timer()
+
+
+
+  DO c = 1, chunks_per_task
+    IF(chunks(c)%task.EQ.parallel%task) THEN
+
+ CALL update_host_data(chunks(c)%field%x_min, &
+                       chunks(c)%field%x_max, &
+                       chunks(c)%field%y_min, &
+                        chunks(c)%field%y_max, &
+                        chunks(c)%field%z_min, &
+                        chunks(c)%field%z_max, &
+                        chunks(c)%field%density0, &
+                        chunks(c)%field%energy0, &
+                        chunks(c)%field%pressure, &
+                        chunks(c)%field%viscosity, &
+                        chunks(c)%field%xvel0, &
+                        chunks(c)%field%yvel0, &
+                        chunks(c)%field%zvel0, &
+                        chunks(c)%field%vertexx, &
+                        chunks(c)%field%vertexy, &
+			chunks(c)%field%vertexz)
+
+
+
+      nxc=chunks(c)%field%x_max-chunks(c)%field%x_min+1
+      nyc=chunks(c)%field%y_max-chunks(c)%field%y_min+1
+      nzc=chunks(c)%field%z_max-chunks(c)%field%z_min+1
+      nxv=nxc+1
+      nyv=nyc+1
+      nzv=nzc+1
+      WRITE(chunk_name, '(i6)') parallel%task+100001
+      chunk_name(1:1) = "."
+      WRITE(step_name, '(i6)') step+100000
+      step_name(1:1) = "."
+      filename = trim(trim(name) //trim(chunk_name)//trim(step_name))//".vtk"
+      u=get_unit(dummy)
+      OPEN(UNIT=u,FILE=filename,STATUS='UNKNOWN',IOSTAT=err)
+      WRITE(u,'(a)')'# vtk DataFile Version 3.0'
+      WRITE(u,'(a)')'vtk output'
+      WRITE(u,'(a)')'ASCII'
+      WRITE(u,'(a)')'DATASET RECTILINEAR_GRID'
+      WRITE(u,'(a,3i12)')'DIMENSIONS',nxv,nyv,nzv
+      WRITE(u,'(a,i5,a)')'X_COORDINATES ',nxv,' double'
+      DO j=chunks(c)%field%x_min,chunks(c)%field%x_max+1
+        WRITE(u,'(e12.4)')chunks(c)%field%vertexx(j)
+      ENDDO
+      WRITE(u,'(a,i5,a)')'Y_COORDINATES ',nyv,' double'
+      DO k=chunks(c)%field%y_min,chunks(c)%field%y_max+1
+        WRITE(u,'(e12.4)')chunks(c)%field%vertexy(k)
+      ENDDO
+      WRITE(u,'(a,i5,a)')'Z_COORDINATES ',nzv,' double'
+      DO l=chunks(c)%field%z_min,chunks(c)%field%z_max+1
+        WRITE(u,'(e12.4)')chunks(c)%field%vertexz(l)
+      ENDDO
+      WRITE(u,'(a,i20)')'CELL_DATA ',nxc*nyc*nzc
+      WRITE(u,'(a)')'FIELD FieldData 4'
+      WRITE(u,'(a,i20,a)')'density 1 ',nxc*nyc*nzc,' double'
+      DO l=chunks(c)%field%z_min,chunks(c)%field%z_max
+        DO k=chunks(c)%field%y_min,chunks(c)%field%y_max
+          WRITE(u,'(e12.4)')(chunks(c)%field%density0(j,k,l),j=chunks(c)%field%x_min,chunks(c)%field%x_max)
+        ENDDO
+      ENDDO
+      WRITE(u,'(a,i20,a)')'energy 1 ',nxc*nyc*nzc,' double'
+      DO l=chunks(c)%field%z_min,chunks(c)%field%z_max
+        DO k=chunks(c)%field%y_min,chunks(c)%field%y_max
+          WRITE(u,'(e12.4)')(chunks(c)%field%energy0(j,k,l),j=chunks(c)%field%x_min,chunks(c)%field%x_max)
+        ENDDO
+      ENDDO
+      WRITE(u,'(a,i20,a)')'pressure 1 ',nxc*nyc*nzc,' double'
+      DO l=chunks(c)%field%z_min,chunks(c)%field%z_max
+        DO k=chunks(c)%field%y_min,chunks(c)%field%y_max
+          WRITE(u,'(e12.4)')(chunks(c)%field%pressure(j,k,l),j=chunks(c)%field%x_min,chunks(c)%field%x_max)
+        ENDDO
+      ENDDO
+      WRITE(u,'(a,i20,a)')'viscosity 1 ',nxc*nyc*nzc,' double'
+      DO l=chunks(c)%field%z_min,chunks(c)%field%z_max
+        DO k=chunks(c)%field%y_min,chunks(c)%field%y_max
+          DO j=chunks(c)%field%x_min,chunks(c)%field%x_max
+            temp_var=0.0
+            IF(chunks(c)%field%viscosity(j,k,l).GT.0.00000001) temp_var=chunks(c)%field%viscosity(j,k,l)
+            WRITE(u,'(e12.4)') temp_var
+          ENDDO
+        ENDDO
+      ENDDO
+      WRITE(u,'(a,i20)')'POINT_DATA ',nxv*nyv*nzv
+      WRITE(u,'(a)')'FIELD FieldData 3'
+      WRITE(u,'(a,i20,a)')'x_vel 1 ',nxv*nyv*nzv,' double'
+      DO l=chunks(c)%field%z_min,chunks(c)%field%z_max+1
+        DO k=chunks(c)%field%y_min,chunks(c)%field%y_max+1
+          DO j=chunks(c)%field%x_min,chunks(c)%field%x_max+1
+            temp_var=0.0
+            IF(ABS(chunks(c)%field%xvel0(j,k,l)).GT.0.00000001) temp_var=chunks(c)%field%xvel0(j,k,l)
+            WRITE(u,'(e12.4)') temp_var
+          ENDDO
+        ENDDO
+      ENDDO
+      WRITE(u,'(a,i20,a)')'y_vel 1 ',nxv*nyv*nzv,' double'
+      DO l=chunks(c)%field%z_min,chunks(c)%field%z_max+1
+        DO k=chunks(c)%field%y_min,chunks(c)%field%y_max+1
+          DO j=chunks(c)%field%x_min,chunks(c)%field%x_max+1
+            temp_var=0.0
+            IF(ABS(chunks(c)%field%yvel0(j,k,l)).GT.0.00000001) temp_var=chunks(c)%field%yvel0(j,k,l)
+            WRITE(u,'(e12.4)') temp_var
+          ENDDO
+        ENDDO
+      ENDDO
+      WRITE(u,'(a,i20,a)')'z_vel 1 ',nxv*nyv*nzv,' double'
+      DO l=chunks(c)%field%z_min,chunks(c)%field%z_max+1
+        DO k=chunks(c)%field%y_min,chunks(c)%field%y_max+1
+          DO j=chunks(c)%field%x_min,chunks(c)%field%x_max+1
+            temp_var=0.0
+            IF(ABS(chunks(c)%field%zvel0(j,k,l)).GT.0.00000001) temp_var=chunks(c)%field%zvel0(j,k,l)
+            WRITE(u,'(e12.4)') temp_var
+          ENDDO
+        ENDDO
+      ENDDO
+      CLOSE(u)
+    ENDIF
+  ENDDO
+  IF(profiler_on) profiler%visit=profiler%visit+(timer()-kernel_time)
+
+END SUBROUTINE visit
+SUBROUTINE update_host_data(x_min,x_max,y_min,y_max,z_min,z_max, &
+                            density0, &
+                            energy0, &
+                            pressure, &
+                            viscosity, &
+                            xvel0, &
+                            yvel0, &
+                            vertexx, &
+                            vertexy,vertexz )
+
+  IMPLICIT NONE
+
+INTEGER :: x_min,x_max,y_min,y_max,z_min,z_max
+  REAL(KIND=8), DIMENSION(x_min-2:x_max+2,y_min-2:y_max+2,z_min-2:z_max+2)    :: density0
+  REAL(KIND=8), DIMENSION(x_min-2:x_max+2,y_min-2:y_max+2,z_min-2:z_max+2) :: energy0
+  REAL(KIND=8), DIMENSION(x_min-2:x_max+2,y_min-2:y_max+2,z_min-2:z_max+2) :: pressure
+  REAL(KIND=8), DIMENSION(x_min-2:x_max+2 ,y_min-2:y_max+2) :: viscosity
+  REAL(KIND=8), DIMENSION(x_min-2:x_max+3 ,y_min-2:y_max+3 ,z_min-2:z_max+3) :: xvel0,yvel0,zvel0
+  REAL(KIND=8), DIMENSION(x_min-2:x_max+3) :: vertexx
+  REAL(KIND=8), DIMENSION(y_min-2:y_max+3) :: vertexy
+  REAL(KIND=8), DIMENSION(z_min-2:z_max+3) :: vertexz
+
+!$ACC DATA &
+!$ACC PRESENT(density0) &
+!$ACC PRESENT(energy0) &
+!$ACC PRESENT(pressure) &
+!$ACC PRESENT(viscosity) &
+!$ACC PRESENT(xvel0) &
+!$ACC PRESENT(yvel0) &
+!$ACC PRESENT(zvel0) &
+!$ACC PRESENT(vertexx) &
+!$ACC PRESENT(vertexy) &
+!$ACC PRESENT(vertexz)
+!$ACC UPDATE HOST(density0)
+!$ACC UPDATE HOST(energy0)
+!$ACC UPDATE HOST(pressure)
+!$ACC UPDATE HOST(viscosity)
+!$ACC UPDATE HOST(xvel0)
+!$ACC UPDATE HOST(yvel0)
+!$ACC UPDATE HOST(zvel0)
+!$ACC UPDATE HOST(vertexx)
+!$ACC UPDATE HOST(vertexy)
+!$ACC UPDATE HOST(vertexz)
+!$ACC END DATA
+
+
+END SUBROUTINE update_host_data
