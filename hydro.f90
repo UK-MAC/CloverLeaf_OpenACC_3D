@@ -26,7 +26,7 @@ MODULE hydro_cycle_module
 CONTAINS
 
 SUBROUTINE hydro_cycle(c,     &
-		       x_min, &
+               x_min, &
                        x_max, &
                        y_min, &
                        y_max, &
@@ -368,7 +368,7 @@ INTEGER :: cells,c
 
 c=1
   CALL hydro_cycle(c,                          &
-		   chunks(c)%field%x_min, &
+           chunks(c)%field%x_min, &
                    chunks(c)%field%x_max, &
                    chunks(c)%field%y_min, &
                    chunks(c)%field%y_max, &

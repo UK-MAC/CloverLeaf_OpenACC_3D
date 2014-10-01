@@ -121,7 +121,7 @@ INTEGER :: x_min,x_max,y_min,y_max,z_min,z_max
                         chunks(c)%field%zvel0, &
                         chunks(c)%field%vertexx, &
                         chunks(c)%field%vertexy, &
-			chunks(c)%field%vertexz)
+                        chunks(c)%field%vertexz)
 
 
 
@@ -230,6 +230,7 @@ SUBROUTINE update_host_data(x_min,x_max,y_min,y_max,z_min,z_max, &
                             viscosity, &
                             xvel0, &
                             yvel0, &
+                            zvel0, &
                             vertexx, &
                             vertexy,vertexz )
 
