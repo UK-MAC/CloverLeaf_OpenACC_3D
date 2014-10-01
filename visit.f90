@@ -79,7 +79,7 @@ INTEGER :: x_min,x_max,y_min,y_max,z_min,z_max
   IF(profiler_on) profiler%halo_exchange=profiler%halo_exchange+(timer()-kernel_time)
 
   IF(profiler_on) kernel_time=timer()
-  CALL viscosity()
+  CALL calc_viscosity()
   IF(profiler_on) profiler%viscosity=profiler%viscosity+(timer()-kernel_time)
   IF ( parallel%boss ) THEN
 

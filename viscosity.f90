@@ -24,7 +24,7 @@ MODULE viscosity_module
 
 CONTAINS
 
-SUBROUTINE viscosity()
+SUBROUTINE calc_viscosity()
 
   USE clover_module
   USE viscosity_kernel_module
@@ -62,6 +62,6 @@ SUBROUTINE viscosity()
 
   ENDDO
 
-END SUBROUTINE viscosity
+END SUBROUTINE calc_viscosity
 
 END MODULE viscosity_module

@@ -38,38 +38,38 @@ INTEGER :: c
   INTEGER, ALLOCATABLE :: right(:),left(:),top(:),bottom(:),back(:),front(:)
 
   INTEGER :: fields(NUM_FIELDS) !, chunk_task_responsible_for
-  REAL(KIND=8), DIMENSION(:,:,:)    :: density0
-  REAL(KIND=8), DIMENSION(:,:,:) :: density1
-  REAL(KIND=8), DIMENSION(:,:,:) :: energy0
-  REAL(KIND=8), DIMENSION(:,:,:) :: energy1
-  REAL(KIND=8), DIMENSION(:,:,:) :: soundspeed
-  REAL(KIND=8), DIMENSION(:,:,:) :: pressure
-  REAL(KIND=8), DIMENSION(: ,: ,:) :: viscosity
-  REAL(KIND=8), DIMENSION(: ,: ,:) :: xvel0,yvel0,zvel0
-  REAL(KIND=8), DIMENSION(: ,: ,:) :: xvel1,yvel1,zvel1
-  REAL(KIND=8), DIMENSION(:,:,:) :: vol_flux_x,mass_flux_x
-  REAL(KIND=8), DIMENSION(:,:,:) :: vol_flux_y,mass_flux_y
-  REAL(KIND=8), DIMENSION(:,:,:) :: vol_flux_z,mass_flux_z
-  REAL(KIND=8), DIMENSION(:,:,:) :: volume
-  REAL(KIND=8), DIMENSION(:) :: vertexx
-  REAL(KIND=8), DIMENSION(:) :: vertexdx
-  REAL(KIND=8), DIMENSION(:) :: vertexy
-  REAL(KIND=8), DIMENSION(:) :: vertexdy
-  REAL(KIND=8), DIMENSION(:) :: vertexz
-  REAL(KIND=8), DIMENSION(:) :: vertexdz
-  REAL(KIND=8), DIMENSION(:) :: cellx
-  REAL(KIND=8), DIMENSION(:) :: celldx
-  REAL(KIND=8), DIMENSION(:) :: celly
-  REAL(KIND=8), DIMENSION(:) :: celldy
-  REAL(KIND=8), DIMENSION(:) :: cellz
-  REAL(KIND=8), DIMENSION(:) :: celldz
-  REAL(KIND=8), DIMENSION(: ,: ,:) :: xarea
-  REAL(KIND=8), DIMENSION(: ,: ,:) :: yarea
-  REAL(KIND=8), DIMENSION(: ,: ,:) :: zarea
-  REAL(KIND=8) :: left_snd_buffer(:),left_rcv_buffer(:),right_snd_buffer(:),right_rcv_buffer(:)
-  REAL(KIND=8) :: bottom_snd_buffer(:),bottom_rcv_buffer(:),top_snd_buffer(:),top_rcv_buffer(:)
-  REAL(KIND=8) :: back_snd_buffer(:),back_rcv_buffer(:)
-  REAL(KIND=8) :: front_snd_buffer(:),front_rcv_buffer(:)
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:,:,:)    :: density0
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:,:,:) :: density1
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:,:,:) :: energy0
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:,:,:) :: energy1
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:,:,:) :: soundspeed
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:,:,:) :: pressure
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(: ,: ,:) :: viscosity
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(: ,: ,:) :: xvel0,yvel0,zvel0
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(: ,: ,:) :: xvel1,yvel1,zvel1
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:,:,:) :: vol_flux_x,mass_flux_x
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:,:,:) :: vol_flux_y,mass_flux_y
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:,:,:) :: vol_flux_z,mass_flux_z
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:,:,:) :: volume
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:) :: vertexx
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:) :: vertexdx
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:) :: vertexy
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:) :: vertexdy
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:) :: vertexz
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:) :: vertexdz
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:) :: cellx
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:) :: celldx
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:) :: celly
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:) :: celldy
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:) :: cellz
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(:) :: celldz
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(: ,: ,:) :: xarea
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(: ,: ,:) :: yarea
+  REAL(KIND=8),ALLOCATABLE, DIMENSION(: ,: ,:) :: zarea
+  REAL(KIND=8),ALLOCATABLE :: left_snd_buffer(:),left_rcv_buffer(:),right_snd_buffer(:),right_rcv_buffer(:)
+  REAL(KIND=8),ALLOCATABLE :: bottom_snd_buffer(:),bottom_rcv_buffer(:),top_snd_buffer(:),top_rcv_buffer(:)
+  REAL(KIND=8),ALLOCATABLE :: back_snd_buffer(:),back_rcv_buffer(:)
+  REAL(KIND=8),ALLOCATABLE :: front_snd_buffer(:),front_rcv_buffer(:)
   LOGICAL :: profiler_off
 
   IF(parallel%boss)THEN

@@ -122,7 +122,7 @@ CFLAGS=$(CFLAGS_$(COMPILER)) $(OMP) $(I3E) $(C_OPTIONS) -c
 MPI_COMPILER=mpif90
 C_MPI_COMPILER=mpicc
 
-clover_leaf: *.f90 Makefile
+clover_leaf: timer_c.o *.f90 Makefile
 	$(MPI_COMPILER) $(FLAGS)	\
 	data.f90			\
 	definitions.f90			\
@@ -168,6 +168,7 @@ clover_leaf: *.f90 Makefile
 	hydro.f90			\
 	visit.f90			\
 	clover_leaf.f90			\
+    timer_c.o \
 	-o clover_leaf; echo $(MESSAGE)
 
 
